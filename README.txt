@@ -40,5 +40,5 @@ package.json is a BTEdb database with these objects
 Type may be one of either "Binary" or "Source"
 Binary packages have pre/post scripts run and are extracted directly to / (or a prefix specified with a command line argument)
 Source packages do NOT have pre/post scripts run on them and are extracted to a temporary directory created with the mktemp command in /tmp/tpm. There, ./configure --prefix=/opt/tpm/buckets/(packagename), make and make install are run, returning an error if any of them exit uncleanly. Files are then recursively symlinked
-On any install, before installing (we will use the install command) we check to see if there is any conflict with previously installed packages using package recipts. 
-After installation, the files that were installed and the current version of the package is stored in a reciept on-disk, and the version and name are stored in the client configuration by the daemon
+On any install, before installing (we will use the install command) we check to see if there is any conflict with previously installed packages using package receipts. 
+After installation, the files that were installed and the current version of the package is stored in a receipt on-disk, and the version and name are stored in the client configuration by the daemon
