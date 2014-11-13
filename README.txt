@@ -1,7 +1,7 @@
 Ok this is it
 
-The server has a directory of 7zipped files, packages
-This list is complete
+The server has a directory of tar.gz'd files, packages
+This directory is complete
 The server, every 12 hours or so goes through all the files in this directory and puts their info into a master BTEdb database
 It then generates a torrent files
 Both the database and torrent file are served over HTTP using a WSGI application
@@ -14,9 +14,9 @@ This directory is only partial, and only has the packages installed on the clien
 The CLI process accesses most things through interprocess communication using FIFO pipes and lockfiles. 
 For example, if you run tpm install libexample, it would open the pipe and request information on libexample. This returns the information to the cli process, which can find in that data the list of dependencies. It continues recursing until it has a list of all packages that must be installed, then prompts the user (overridable with a command line option, and the user is not prompted if there are no uninstalled dependencies). The CLI process then tells the daemon to begin downloading some files. The daemon tells the client when each file is done, and the client installs them.
 
-Each package file is a 7z archive with two folders, this is an example
+Each package file is a gztar archive with two folders, this is an example
 
-libexample-0.1-x86_64.7z
+libexample-0.1-x86_64.tpkg
 	data
 		usr
 			lib
