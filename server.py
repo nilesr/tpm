@@ -24,7 +24,8 @@ class MutableDatabase:
     def close(self):
         pass
 def RegeneratePackageIndex():
-	master.BeginTransaction(False)
+	if not master.TransactionInProgress:
+		master.BeginTransaction(False)
 	for packagefile in glob.glob(PackagesDirectory+"/*.tpkg"):
 		try:
 			package = tarfile.open(packagefile,"r:gz")
@@ -39,5 +40,23 @@ def RegeneratePackageIndex():
 			print(traceback.format_exc())
 			continue
 	master.CommitTransaction()
+	GenerateLatestVersions()
 	print(master)
+def GenerateLatestVersions():
+	if not master.TransactionInProgress:
+		master.BeginTransaction(False)
+	for package in master.ListTables():
+		LatestReleaseEpoch = 0
+		for version in master.Dump(package):
+			if version["Version"] == "Latest":
+				continue
+			else:
+				if version["ReleaseEpoch"] > LatestReleaseEpoch:
+					LatestReleaseEpoch = version["ReleaseEpoch"]
+					PackageLatestVersion = version["Version"]
+		if len(db.Select(package,Version = "Latest")) == 0:
+			db.Insert(package, Version = "Latest", LatestVersion = PackageLatestVersion)
+		else:
+			db.Update(package, db.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
+	master.CommitTransaction()
 RegeneratePackageIndex()
