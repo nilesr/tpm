@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback
+import glob, BTEdb, os, tarfile, traceback, waitress
 MasterDirectory="/var/tpm-mirror"
 PackagesDirectory=MasterDirectory+"/packages"
 if not os.path.isdir(MasterDirectory):
@@ -64,4 +64,15 @@ def GenerateLatestVersions():
 		else:
 			master.Update(package, master.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
 	master.CommitTransaction()
+def serve(environ, start_response):
+	if environ["PATH_INFO"] == "/":
+		start_response("200 OK",  [('Content-type','text/html')])
+		return """<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>TPM Package Repository</h1><ul><li><a href="/package-index.json>Package Index</a></li><li><a href="/torrent">Current torrent</a></li></ul></body></html>"""
+	if environ["PATH_INFO"].lower()[-len("torrent")] == "torrent":
+		start_response("200 OK", [('Content-type','application/x-bittorrent')])
+		return "" # TODO
+	if environ["PATH_INFO"].lower() == "package-index.json":
+		start_response("200 OK",  [('Content-type','application/json')])
+		return json.dumps(master.master) # Only return master, don't want to send any triggers or savepoints
 RegeneratePackageIndex()
+waitress.serve(serve, host="0.0.0.0", port=5000) # TODO config file
