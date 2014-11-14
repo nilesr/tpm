@@ -97,7 +97,7 @@ def serve_file(environ, start_response):
 		return """<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1></body></html>"""
 
 def serve(*args, **kwargs):
-	return str(serve_file(*args, **kwargs))
+	return serve_file(*args, **kwargs).decode("utf-8")
 
 RegeneratePackageIndex()
 waitress.serve(serve, host="0.0.0.0", port=5000) # TODO config file
