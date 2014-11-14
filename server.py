@@ -24,13 +24,20 @@ class MutableDatabase:
     def close(self):
         pass
 def RegeneratePackageIndex():
+	master.BeginTransaction(False)
 	for packagefile in glob.glob(PackagesDirectory+"/*.tpkg"):
 		try:
 			package = tarfile.open(packagefile,"r:gz")
-			#packageInfo = BTEdb.Database(MutableDatabase(package.extractfile(package.getmember("info/package.json"))))
-			packageInfo = BTEdb.Database(MutableDatabase(package.extractfile(package.getmember("info/package.json")).read().decode("utf-8")))
-			print(packageInfo.ListTables())
+			PackageInfo = BTEdb.Database(MutableDatabase(package.extractfile(package.getmember("info/package.json")).read().decode("utf-8"))) # Trust me, this probably works
+			PackageDatapoint = PackageInfo.Dump("info")[0]
+			#print(PackageDatapoint)
+			if not master.TableExists(PackageDatapoint["PackageName"]):
+				master.Create(PackageDatapoint["PackageName"])
+			if not PackageDatapoint["Version"] in master.Dump(PackageDatapoint["PackageName"]):
+				master.Insert(PackageDatapoint["PackageName"], [PackageDatapoint["Version"],PackageDatapoint])
 		except:
 			print(traceback.format_exc())
 			continue
+	master.CommitTransaction()
+	print(master)
 RegeneratePackageIndex()
