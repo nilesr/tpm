@@ -31,26 +31,27 @@ def RegeneratePackageIndex():
 			package = tarfile.open(packagefile,"r:gz")
 			PackageInfo = BTEdb.Database(MutableDatabase(package.extractfile(package.getmember("info/package.json")).read().decode("utf-8"))) # Trust me, this probably works
 			PackageDatapoint = PackageInfo.Dump("info")[0]
-			print(PackageDatapoint)
 			if not master.TableExists(PackageDatapoint["PackageName"]):
 				master.Create(PackageDatapoint["PackageName"])
-			if not PackageDatapoint["Version"] in master.Dump(PackageDatapoint["PackageName"]):
+			VersionsAlreadyDone = []
+			for version in master.Dump(PackageDatapoint["PackageName"]):
+				VersionsAlreadyDone.insert(0,version["Version"])
+			if not PackageDatapoint["Version"] in VersionsAlreadyDone:
 				x = []
 				for y,z in PackageDatapoint.items():
-					x.insert(0,[y,z])
-				print(x)
-				master.Insert(PackageDatapoint["PackageName"], *x)
+					x.insert(0,[y,z]) # X becomes a list of lists, each list inside x is a key-value pair for properties of a package
+				master.Insert(PackageDatapoint["PackageName"], Filename = os.path.basename(packagefile) , *x) # Gets the filename and also appends all the elements of x to the end of the methodcall
 		except:
 			print(traceback.format_exc())
 			continue
 	master.CommitTransaction()
 	GenerateLatestVersions()
-	print(master)
 def GenerateLatestVersions():
 	if not master.TransactionInProgress:
 		master.BeginTransaction(False)
 	for package in master.ListTables():
 		LatestReleaseEpoch = 0
+		PackageLatestVersion = "Error"
 		for version in master.Dump(package):
 			if version["Version"] == "Latest":
 				continue
