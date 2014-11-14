@@ -62,7 +62,7 @@ target/
 .DS_Store
 .AppleDouble
 .LSOverride
-
+nbproject
 # Icon must end with two \r
 Icon
 

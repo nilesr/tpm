@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 # Server
 import glob, BTEdb, os, tarfile, traceback, waitress
-MasterDirectory="/var/tpm-mirror"
-PackagesDirectory=MasterDirectory+"/packages"
-if not os.path.isdir(MasterDirectory):
-	os.mkdir(MasterDirectory)
-if not os.path.isdir(PackagesDirectory):
-	os.mkdir(PackagesDirectory)
-master = BTEdb.Database(MasterDirectory+"/package-index.json")
+
 class MutableDatabase:
     def seek(self,position,mode):
         pass
@@ -23,6 +17,17 @@ class MutableDatabase:
         return str(self.data)
     def close(self):
         pass
+
+MasterDirectory = "/var/tpm-mirror"
+PackagesDirectory= MasterDirectory + "/packages"
+
+if not os.path.isdir(MasterDirectory):
+	os.mkdir(MasterDirectory)
+if not os.path.isdir(PackagesDirectory):
+	os.mkdir(PackagesDirectory)
+        
+master = BTEdb.Database(MasterDirectory+"/package-index.json")
+
 def RegeneratePackageIndex():
 	if not master.TransactionInProgress:
 		master.BeginTransaction(False)
