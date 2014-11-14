@@ -72,7 +72,7 @@ def GenerateLatestVersions():
 		else:
 			master.Update(package, master.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
 	master.CommitTransaction()
-def serve(environ, start_response):
+def serve_file(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
 		return """<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>"""
@@ -95,6 +95,9 @@ def serve(environ, start_response):
 	else:
 		start_response("404 Not Found", [('Content-type',mime)])
 		return """<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1></body></html>"""
+
+def serve(*args, **kwargs):
+	return str(serve_file(*args, **kwargs))
 
 RegeneratePackageIndex()
 waitress.serve(serve, host="0.0.0.0", port=5000) # TODO config file
