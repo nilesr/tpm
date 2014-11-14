@@ -35,7 +35,10 @@ def RegeneratePackageIndex():
 			if not master.TableExists(PackageDatapoint["PackageName"]):
 				master.Create(PackageDatapoint["PackageName"])
 			if not PackageDatapoint["Version"] in master.Dump(PackageDatapoint["PackageName"]):
-				master.Insert(PackageDatapoint["PackageName"], [PackageDatapoint["Version"],PackageDatapoint])
+				x = []
+				for y,z in PackageDatapoint:
+					x.insert([y,z])
+				master.Insert(PackageDatapoint["PackageName"], *x)
 		except:
 			print(traceback.format_exc())
 			continue
