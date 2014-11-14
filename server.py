@@ -31,13 +31,14 @@ def RegeneratePackageIndex():
 			package = tarfile.open(packagefile,"r:gz")
 			PackageInfo = BTEdb.Database(MutableDatabase(package.extractfile(package.getmember("info/package.json")).read().decode("utf-8"))) # Trust me, this probably works
 			PackageDatapoint = PackageInfo.Dump("info")[0]
-			#print(PackageDatapoint)
+			print(PackageDatapoint)
 			if not master.TableExists(PackageDatapoint["PackageName"]):
 				master.Create(PackageDatapoint["PackageName"])
 			if not PackageDatapoint["Version"] in master.Dump(PackageDatapoint["PackageName"]):
 				x = []
-				for y,z in PackageDatapoint:
-					x.insert([y,z])
+				for y,z in PackageDatapoint.items():
+					x.insert(0,[y,z])
+				print(x)
 				master.Insert(PackageDatapoint["PackageName"], *x)
 		except:
 			print(traceback.format_exc())
@@ -57,9 +58,9 @@ def GenerateLatestVersions():
 				if version["ReleaseEpoch"] > LatestReleaseEpoch:
 					LatestReleaseEpoch = version["ReleaseEpoch"]
 					PackageLatestVersion = version["Version"]
-		if len(db.Select(package,Version = "Latest")) == 0:
-			db.Insert(package, Version = "Latest", LatestVersion = PackageLatestVersion)
+		if len(master.Select(package,Version = "Latest")) == 0:
+			master.Insert(package, Version = "Latest", LatestVersion = PackageLatestVersion)
 		else:
-			db.Update(package, db.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
+			master.Update(package, master.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
 	master.CommitTransaction()
 RegeneratePackageIndex()
