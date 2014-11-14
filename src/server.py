@@ -19,14 +19,16 @@ class MutableDatabase:
         pass
 
 MasterDirectory = "/var/tpm-mirror"
-PackagesDirectory= MasterDirectory + "/packages"
-HTTPRoot= MasterDirectory + "/www"
+PackagesDirectory = MasterDirectory + "/packages"
+HTTPRoot = MasterDirectory + "/www"
 
 if not os.path.isdir(MasterDirectory):
 	os.mkdir(MasterDirectory)
 if not os.path.isdir(PackagesDirectory):
 	os.mkdir(PackagesDirectory)
-        
+if not os.path.isdir(HTTPRoot):
+	os.mkdir(HTTPRoot)
+
 master = BTEdb.Database(MasterDirectory+"/package-index.json")
 
 def RegeneratePackageIndex():
