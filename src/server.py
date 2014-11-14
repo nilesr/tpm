@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback, waitress
+import glob, BTEdb, os, tarfile, traceback, mimetypes
+from cherrypy import wsgiserver
 
 class MutableDatabase:
     def seek(self,position,mode):
@@ -72,7 +73,7 @@ def GenerateLatestVersions():
 		else:
 			master.Update(package, master.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
 	master.CommitTransaction()
-def serve_file(environ, start_response):
+def serve(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
 		return """<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>"""
@@ -84,7 +85,7 @@ def serve_file(environ, start_response):
 		return json.dumps(master.master) # Only return master, don't want to send any triggers or savepoints
 	filename = HTTPRoot + environ["PATH_INFO"]
 	if os.path.exists(filename):
-		mime = mimetypes.guess_type()[0]
+		mime = mimetypes.guess_type(filename)[0]
 		if not mime:
 			mime = "text/text"
 		start_response("200 OK", [('Content-type',mime)])
@@ -96,8 +97,16 @@ def serve_file(environ, start_response):
 		start_response("404 Not Found", [('Content-type',mime)])
 		return """<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1></body></html>"""
 
-def serve(*args, **kwargs):
-	return serve_file(*args, **kwargs).decode("utf-8")
-
 RegeneratePackageIndex()
-waitress.serve(serve, host="0.0.0.0", port=5000) # TODO config file
+
+mimetypes.init()
+server = wsgiserver.CherryPyWSGIServer(('0.0.0.0', 5000), serve, numthreads=10, request_queue_size=200)
+server.start()
+#cherrypy.config.update({'server.socket_port': 5000,
+#			'server.socket_host': "0.0.0.0",
+#                        'engine.autoreload_on': False,
+#			'tools.gzip.on': True,
+#                        'log.access_file': './access.log',
+#                        'log.error_file': './error.log'})
+#cherrypy.tree.graft(serve) # TODO config file
+#cherrypy.quickstart()
