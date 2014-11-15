@@ -111,9 +111,6 @@ def GenerateTorrent():
 	#lt.set_piece_hashes(t,"/var/tpm-mirror/packages/") # Not working
 	return t.generate()
 
-RegeneratePackageIndex()
-torrent = GenerateTorrent()
-
 
 mimetypes.init()
 
@@ -127,6 +124,13 @@ webthread.start()
 print("Serving on port 5001")
 
 def RegenerateTimer():
+	print("Generating package index")
+	RegeneratePackageIndex()
+	torrent = GenerateTorrent()
+	print("Generated package index")
+	tosleep = 12*3600 - (int(time.time()) % (12*3600))
+	print("Sleeping " + str(tosleep) + " seconds")
+	time.sleep(tosleep)
 	while True:
 		time.sleep(12*3600) # 12 hours
 		print("Regenerating package index and torrentfile")
