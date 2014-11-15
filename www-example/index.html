@@ -1,22 +1,13 @@
 <!doctype html>
 <html>
 	<head>
+		<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
 		<title>TPM Package Database</title>
 		<script>
-			var nameSpace = angular.module("Database", []);
-
-			nameSpace.controller("DatabaseFunction", ['$scope','$http', function($scope, $http)
-					{    
-						$http.get('/package-index.json').success (function(data){
-							$scope.guitarVariable = data;
-					});
-
-					}]
-			);
 		</script>
 	</head>
 	<body style="background-color: #E4DDCA;">
@@ -35,7 +26,18 @@
 		</nav>
 
 		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container-fluid">
-			<!-- Stuff here -->
+			<div ng-init="friends = {}"></div>
+			<script>
+				$http.get('/package-index.json').success(function(data,status,headers,config){friends=data});
+			</script>
+			Search: <input ng-model="searchText">
+			<table id="searchTextResults">
+				<tr><th>Name</th><th>Phone</th></tr>
+				<tr ng-repeat="package in packageindex | filter:searchText">
+					<td>{{package.Version}}</td>
+					<td>{{package.Hash}}</td>
+				</tr>
+			</table>
 		</div>
 	</body>
 </html>
