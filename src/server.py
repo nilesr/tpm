@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, hashlib, json
+import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, hashlib, json, threading, time
 import libtorrent as lt
 class MutableDatabase:
     def seek(self,position,mode):
@@ -117,5 +117,24 @@ torrent = GenerateTorrent()
 
 mimetypes.init()
 
-server = wsgiref.simple_server.make_server("",5001,serve)
-server.serve_forever()
+def webserver():
+	server = wsgiref.simple_server.make_server("",5001,serve)
+	server.serve_forever()
+
+webthread = threading.Thread(target=webserver)
+webthread.daemon = False # Important
+webthread.start()
+print("Serving on port 5001")
+
+def RegenerateTimer():
+	while True:
+		time.sleep(12*3600) # 12 hours
+		print("Regenerating package index and torrentfile")
+		RegeneratePackageIndex()
+		torrent = GenerateTorrent()
+		print("Regeneration terminated")
+
+rthread = threading.Thread(target=RegenerateTimer)
+rthread.daemon = False
+rthread.start()
+print("Regenerating package index every 12 hours")
