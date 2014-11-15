@@ -141,3 +141,9 @@ rthread = threading.Thread(target=RegenerateTimer)
 rthread.daemon = False
 rthread.start()
 print("Regenerating package index every 12 hours")
+
+info = lt.torrent_info(torrent)
+
+h = ses.add_torrent({save_path: PackagesDirectory, storage_mode: lt.storage_mode_t.storage_mode_sparse, ti: info})
+
+s = h.status()
