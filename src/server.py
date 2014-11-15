@@ -97,7 +97,7 @@ def serve(environ, start_response):
 		return fix_for_wsgiref(returnvalue)
 	else:
 		start_response("404 Not Found", [('Content-type',"text/html")])
-		return fix_for_wsgiref("""<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1></body></html>""")
+		return fix_for_wsgiref("""<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1><pre>"""+environ["PATH_INFO"]+"""</pre> was not found</body></html>""")
 
 RegeneratePackageIndex()
 
