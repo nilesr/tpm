@@ -8,9 +8,19 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
 		<title>TPM Package Database</title>
 		<script>
+			var app = angular.module("Database", []);
+			app.controller("DatabaseController", function($scope, $http) {
+			  $http.get('package-index.json').
+				success(function(data, status, headers, config) {
+				  $scope.packages = data;
+				}).
+				error(function(data, status, headers, config) {
+					alert("Error loading data");
+				});
+			});
 		</script>
 	</head>
-	<body style="background-color: #E4DDCA;">
+	<body style="background-color: #E4DDCA;" ng-app="Database">
 		<nav class="navbar navbar-default navbar-sticky-top" role="navigation">
 			<div class="navbar-header">
 				<a class="navbar-brand" style="font-size:large" href="/">TPM Package Database</a>
@@ -26,17 +36,15 @@
 		</nav>
 
 		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container-fluid">
-			<div ng-init="friends = {}"></div>
-			<script>
-				$http.get('/package-index.json').success(function(data,status,headers,config){friends=data});
-			</script>
 			Search: <input ng-model="searchText">
 			<table id="searchTextResults">
 				<tr><th>Name</th><th>Phone</th></tr>
-				<tr ng-repeat="package in packageindex | filter:searchText">
-					<td>{{package.Version}}</td>
-					<td>{{package.Hash}}</td>
-				</tr>
+				<div ng-controller="DatabaseController">
+					<tr ng-repeat="package in packages | filter:searchText">
+						<td>{{package.Version}}</td>
+						<td>{{package.Hash}}</td>
+					</tr>
+				</div>
 			</table>
 		</div>
 	</body>
