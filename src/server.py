@@ -89,8 +89,7 @@ def serve(environ, start_response):
 	if environ["PATH_INFO"].lower() == "/package-index.json":
 		start_response("200 OK",  [('Content-type','application/json')])
 		return fix_for_wsgiref(json.dumps(master.master)) # Only return master, don't want to send any triggers or savepoints
-	filename = HTTPRoot + environ["PATH_INFO"].replace("/..","/.")
-	print(filename)
+	filename = HTTPRoot + environ["PATH_INFO"]
 	if os.path.exists(filename):
 		mime = mimetypes.guess_type(filename)[0]
 		if not mime:
