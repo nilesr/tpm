@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server
+import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, libtorrent
 
 class MutableDatabase:
     def seek(self,position,mode):
@@ -74,14 +74,14 @@ def GenerateLatestVersions():
 	master.CommitTransaction()
 
 def fix_for_wsgiref(st):
-	return [st.encode("utf-8")]
+	return [st.encode("utf-8")] # This is because wsgiref is made for python 2 and still hasn't been updated properly
 def serve(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
 		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>""")
 	if environ["PATH_INFO"].lower()[-len("torrent")] == "torrent":
 		start_response("200 OK", [('Content-type','application/x-bittorrent')])
-		return fix_for_wsgiref("") # TODO
+		return fix_for_wsgiref(torrent)
 	if environ["PATH_INFO"].lower() == "package-index.json":
 		start_response("200 OK",  [('Content-type','application/json')])
 		return fix_for_wsgiref(json.dumps(master.master)) # Only return master, don't want to send any triggers or savepoints
@@ -100,6 +100,15 @@ def serve(environ, start_response):
 		return fix_for_wsgiref("""<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1><pre>"""+environ["PATH_INFO"]+"""</pre> was not found</body></html>""")
 
 RegeneratePackageIndex()
+
+def GenerateTorrent():
+	fs = lt.file_storage()
+	lt.add_files(fs, "/var/tpm-mirror/packages/")
+	t = lt.create_torrent(fs, flags = 1&8&16)
+	t.add_tracker("udp://tracker.publicbt.com:80")
+	#lt.set_piece_hashes(t,"/var/tpm-mirror/packages/") # Not working
+	torrent = lt.bencode(t.generate())
+
 
 mimetypes.init()
 
