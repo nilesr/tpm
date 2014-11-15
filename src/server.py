@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback, mimetypes
-from cherrypy import wsgiserver
+import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server
 
 class MutableDatabase:
     def seek(self,position,mode):
@@ -73,16 +72,19 @@ def GenerateLatestVersions():
 		else:
 			master.Update(package, master.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
 	master.CommitTransaction()
+
+def fix_for_wsgiref(st):
+	return [st.encode("utf-8")]
 def serve(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
-		return """<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>"""
+		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>""")
 	if environ["PATH_INFO"].lower()[-len("torrent")] == "torrent":
 		start_response("200 OK", [('Content-type','application/x-bittorrent')])
-		return "" # TODO
+		return fix_for_wsgiref("") # TODO
 	if environ["PATH_INFO"].lower() == "package-index.json":
 		start_response("200 OK",  [('Content-type','application/json')])
-		return json.dumps(master.master) # Only return master, don't want to send any triggers or savepoints
+		return fix_for_wsgiref(json.dumps(master.master)) # Only return master, don't want to send any triggers or savepoints
 	filename = HTTPRoot + environ["PATH_INFO"]
 	if os.path.exists(filename):
 		mime = mimetypes.guess_type(filename)[0]
@@ -92,22 +94,14 @@ def serve(environ, start_response):
 		fileObj = open(filename)
 		returnvalue = fileObj.read()
 		fileObj.close()
-		return returnvalue
+		return fix_for_wsgiref(returnvalue)
 	else:
-		start_response("404 Not Found", [('Content-type',mime)])
-		return """<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1></body></html>"""
+		start_response("404 Not Found", [('Content-type',"text/html")])
+		return fix_for_wsgiref("""<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1></body></html>""")
 
 RegeneratePackageIndex()
 
 mimetypes.init()
-wsgi.CherryPyWSGIServer.ssl_adapter = wsgiserver.ssl_builtin.BuiltinSSLAdapter(certificate="certificate.crt",private_key="privateKey.key")
-server = wsgiserver.CherryPyWSGIServer(('0.0.0.0', 5000), serve, numthreads=10, request_queue_size=200)
-server.start()
-#cherrypy.config.update({'server.socket_port': 5000,
-#			'server.socket_host': "0.0.0.0",
-#                        'engine.autoreload_on': False,
-#			'tools.gzip.on': True,
-#                        'log.access_file': './access.log',
-#                        'log.error_file': './error.log'})
-#cherrypy.tree.graft(serve) # TODO config file
-#cherrypy.quickstart()
+
+server = wsgiref.simple_server.make_server("",5000,serve)
+server.serve_forever()
