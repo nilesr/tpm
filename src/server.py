@@ -100,6 +100,7 @@ def serve(environ, start_response):
 RegeneratePackageIndex()
 
 mimetypes.init()
+wsgi.CherryPyWSGIServer.ssl_adapter = wsgiserver.ssl_builtin.BuiltinSSLAdapter(certificate="certificate.crt",private_key="privateKey.key")
 server = wsgiserver.CherryPyWSGIServer(('0.0.0.0', 5000), serve, numthreads=10, request_queue_size=200)
 server.start()
 #cherrypy.config.update({'server.socket_port': 5000,
