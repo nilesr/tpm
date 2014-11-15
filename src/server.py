@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, libtorrent
-
+import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, hashlib, json
+import libtorrent as lt
 class MutableDatabase:
     def seek(self,position,mode):
         pass
@@ -29,6 +29,8 @@ if not os.path.isdir(PackagesDirectory):
 if not os.path.isdir(HTTPRoot):
 	os.mkdir(HTTPRoot)
 
+torrent = ""
+
 master = BTEdb.Database(MasterDirectory+"/package-index.json")
 
 def RegeneratePackageIndex():
@@ -48,7 +50,9 @@ def RegeneratePackageIndex():
 				x = []
 				for y,z in PackageDatapoint.items():
 					x.insert(0,[y,z]) # X becomes a list of lists, each list inside x is a key-value pair for properties of a package
-				master.Insert(PackageDatapoint["PackageName"], Filename = os.path.basename(packagefile) , *x) # Gets the filename and also appends all the elements of x to the end of the methodcall
+				packagefileobj = open(packagefile, "rb")
+				master.Insert(PackageDatapoint["PackageName"], Filename = os.path.basename(packagefile), Hash = hashlib.sha256(packagefileobj.read()).hexdigest() , *x) # Gets the filename and also appends all the elements of x to the end of the methodcall
+				packagefileobj.close()
 		except:
 			print(traceback.format_exc())
 			continue
@@ -79,10 +83,10 @@ def serve(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
 		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>""")
-	if environ["PATH_INFO"].lower()[-len("torrent")] == "torrent":
+	if environ["PATH_INFO"].lower()[-len("torrent"):] == "torrent":
 		start_response("200 OK", [('Content-type','application/x-bittorrent')])
-		return fix_for_wsgiref(torrent)
-	if environ["PATH_INFO"].lower() == "package-index.json":
+		return fix_for_wsgiref(lt.bencode(torrent))
+	if environ["PATH_INFO"].lower() == "/package-index.json":
 		start_response("200 OK",  [('Content-type','application/json')])
 		return fix_for_wsgiref(json.dumps(master.master)) # Only return master, don't want to send any triggers or savepoints
 	filename = HTTPRoot + environ["PATH_INFO"]
@@ -99,15 +103,16 @@ def serve(environ, start_response):
 		start_response("404 Not Found", [('Content-type',"text/html")])
 		return fix_for_wsgiref("""<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1><pre>"""+environ["PATH_INFO"]+"""</pre> was not found</body></html>""")
 
-RegeneratePackageIndex()
-
 def GenerateTorrent():
 	fs = lt.file_storage()
 	lt.add_files(fs, "/var/tpm-mirror/packages/")
-	t = lt.create_torrent(fs, flags = 1&8&16)
+	t = lt.create_torrent(fs, flags = 1&8&16) # 16 does nothing right now as lt.set_piece_hashes isn't being called
 	t.add_tracker("udp://tracker.publicbt.com:80")
 	#lt.set_piece_hashes(t,"/var/tpm-mirror/packages/") # Not working
-	torrent = lt.bencode(t.generate())
+	return t.generate()
+
+RegeneratePackageIndex()
+torrent = GenerateTorrent()
 
 
 mimetypes.init()
