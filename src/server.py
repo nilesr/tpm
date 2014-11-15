@@ -30,6 +30,7 @@ if not os.path.isdir(HTTPRoot):
 	os.mkdir(HTTPRoot)
 
 torrent = ""
+tstatus = False
 
 master = BTEdb.Database(MasterDirectory+"/package-index.json")
 
@@ -105,12 +106,29 @@ def serve(environ, start_response):
 
 def GenerateTorrent():
 	fs = lt.file_storage()
-	lt.add_files(fs, "/var/tpm-mirror/packages/")
+	lt.add_files(fs, PackagesDirectory)
 	t = lt.create_torrent(fs, flags = 1&8&16) # 16 does nothing right now as lt.set_piece_hashes isn't being called
 	t.add_tracker("udp://tracker.publicbt.com:80")
-	#lt.set_piece_hashes(t,"/var/tpm-mirror/packages/") # Not working
+	#lt.set_piece_hashes(t,PackagesDirectory) # Not working
 	return t.generate()
 
+ses = lt.session()
+ses.listen_on(6881, 6891)
+
+def NewTorrent(pt):
+	info = lt.torrent_info(lt.bdecode(lt.bencode(pt))) # This is nessescary for some reason
+	fs = lt.file_storage()
+	lt.add_files(fs,PackagesDirectory)
+	h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 0x001})
+	s = h.status()
+	print("New torrent added")
+	return s
+
+def GenerateAll():
+	global torrent,tstatus
+	RegeneratePackageIndex
+	torrent = GenerateTorrent()
+	tstatus = NewTorrent(torrent)
 
 mimetypes.init()
 
@@ -125,25 +143,17 @@ print("Serving on port 5001")
 
 def RegenerateTimer():
 	print("Generating package index")
-	RegeneratePackageIndex()
-	torrent = GenerateTorrent()
+	GenerateAll()
 	print("Generated package index")
 	while True:
 		tosleep = 12*3600 - (int(time.time()) % (12*3600))
 		print("Sleeping " + str(tosleep) + " seconds")
 		time.sleep(tosleep)
 		print("Regenerating package index and torrentfile")
-		RegeneratePackageIndex()
-		torrent = GenerateTorrent()
+		GenerateAll()
 		print("Regeneration terminated")
 
 rthread = threading.Thread(target=RegenerateTimer)
 rthread.daemon = False
 rthread.start()
 print("Regenerating package index every 12 hours")
-
-info = lt.torrent_info(torrent)
-
-h = ses.add_torrent({save_path: PackagesDirectory, storage_mode: lt.storage_mode_t.storage_mode_sparse, ti: info})
-
-s = h.status()
