@@ -128,11 +128,10 @@ def RegenerateTimer():
 	RegeneratePackageIndex()
 	torrent = GenerateTorrent()
 	print("Generated package index")
-	tosleep = 12*3600 - (int(time.time()) % (12*3600))
-	print("Sleeping " + str(tosleep) + " seconds")
-	time.sleep(tosleep)
 	while True:
-		time.sleep(12*3600) # 12 hours
+		tosleep = 12*3600 - (int(time.time()) % (12*3600))
+		print("Sleeping " + str(tosleep) + " seconds")
+		time.sleep(tosleep)
 		print("Regenerating package index and torrentfile")
 		RegeneratePackageIndex()
 		torrent = GenerateTorrent()
