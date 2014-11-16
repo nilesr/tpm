@@ -107,13 +107,16 @@ def serve(environ, start_response):
 def GenerateTorrent():
 	fs = lt.file_storage()
 	lt.add_files(fs, PackagesDirectory)
-	t = lt.create_torrent(fs, flags = 1&8&16) # 16 does nothing right now as lt.set_piece_hashes isn't being called
+	#t = lt.create_torrent(fs, flags = 1&8&16)
+	t = lt.create_torrent(fs)
 	t.add_tracker("udp://tracker.publicbt.com:80")
-	#lt.set_piece_hashes(t,PackagesDirectory) # Not working
+	#lt.set_piece_hashes(t,MasterDirectory) # Not working
 	return t.generate()
 
 ses = lt.session()
 ses.listen_on(6881, 6891)
+ses.start_dht()
+ses.start_upnp()
 
 def NewTorrent(pt):
 	info = lt.torrent_info(lt.bdecode(lt.bencode(pt))) # This is nessescary for some reason
