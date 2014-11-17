@@ -5,20 +5,7 @@
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
 		<title>TPM Package Database</title>
-		<script>
-			var app = angular.module("Database", []);
-			app.controller("DatabaseController", function($scope, $http) {
-			  $http.get('package-index.json').
-				success(function(data, status, headers, config) {
-				  $scope.packages = data;
-				}).
-				error(function(data, status, headers, config) {
-					alert("Error loading data");
-				});
-			});
-		</script>
 	</head>
 	<body style="background-color: #E4DDCA;" ng-app="Database">
 		<nav class="navbar navbar-default navbar-sticky-top" role="navigation">
@@ -38,13 +25,17 @@
 		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container-fluid">
 			Search: <input ng-model="searchText">
 			<table id="searchTextResults">
-				<tr><th>Name</th><th>Phone</th></tr>
-				<div ng-controller="DatabaseController">
-					<tr ng-repeat="package in packages | filter:searchText">
-						<td>{{package.Version}}</td>
-						<td>{{package.Hash}}</td>
-					</tr>
-				</div>
+				<thead>
+					<tr><th>Name</th><th>Phone</th></tr>
+				</thead>
+				<tbody>
+					% for x in stuff: # TODO
+						<tr>
+							<td></td>
+							<td></td>
+						</tr>
+					% endif
+				</tbody>
 			</table>
 		</div>
 	</body>

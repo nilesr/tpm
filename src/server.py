@@ -35,6 +35,7 @@ torrent = ""
 tstatus = False
 
 master = BTEdb.Database(MasterDirectory+"/package-index.json")
+master = BTEdb.Database(MasterDirectory+"/hashes.json")
 
 def RegeneratePackageIndex():
 	if not master.TransactionInProgress:
@@ -54,7 +55,12 @@ def RegeneratePackageIndex():
 				for y,z in PackageDatapoint.items():
 					x.insert(0,[y,z]) # X becomes a list of lists, each list inside x is a key-value pair for properties of a package
 				packagefileobj = open(packagefile, "rb")
-				master.Insert(PackageDatapoint["PackageName"], Filename = os.path.basename(packagefile), Hash = hashlib.sha256(packagefileobj.read()).hexdigest() , *x) # Gets the filename and also appends all the elements of x to the end of the methodcall
+				master.Insert(PackageDatapoint["PackageName"], Filename = os.path.basename(packagefile), *x) # Gets the filename and also appends all the elements of x to the end of the methodcall
+				if len(hashes.Dump(PackageDatapoint["PackageName"])) == 0:
+					hashes.Insert(PackageDatapoint["PackageName"], Hash = hashlib.sha256(packagefileobj.read()).hexdigest())
+				else:
+					hashes.Update(PackageDatapoint["PackageName"], hashes.Dump(PackageDatapoint["PackageName"]), Hash = hashlib.sha256(packagefileobj.read()).hexdigest())
+
 				packagefileobj.close()
 		except:
 			print(traceback.format_exc())
@@ -85,26 +91,14 @@ def fix_for_wsgiref(st):
 def serve(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
-		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Loading...</body></html>""")
+		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Redirecting...</body></html>""")
 	if environ["PATH_INFO"].lower()[-len("torrent"):] == "torrent":
 		start_response("200 OK", [('Content-type','application/x-bittorrent')])
 		return fix_for_wsgiref(lt.bencode(torrent))
 	if environ["PATH_INFO"].lower() == "/package-index.json":
 		start_response("200 OK",  [('Content-type','application/json')])
 		return fix_for_wsgiref(json.dumps(master.master)) # Only return master, don't want to send any triggers or savepoints
-	filename = HTTPRoot + environ["PATH_INFO"].replace("/..","/.")
-	if os.path.exists(filename):
-		mime = mimetypes.guess_type(filename)[0]
-		if not mime:
-			mime = "text/text"
-		start_response("200 OK", [('Content-type',mime)])
-		fileObj = open(filename)
-		returnvalue = fileObj.read()
-		fileObj.close()
-		return fix_for_wsgiref(returnvalue)
-	else:
-		start_response("404 Not Found", [('Content-type',"text/html")])
-		return fix_for_wsgiref("""<!doctype html><html><head><title>TPM Package Repository</title></head><body><h1>404 Not Found</h1><pre>"""+environ["PATH_INFO"]+"""</pre> was not found</body></html>""")
+	return fix_for_wsgiref(mako-server.serve(environ, start_response))
 
 def GenerateTorrent():
 	fs = lt.file_storage()
