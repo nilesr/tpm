@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Server
-import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, hashlib, json, threading, time
+import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, hashlib, json, threading, time, mako-server
 import libtorrent as lt
 class MutableDatabase:
     def seek(self,position,mode):
@@ -17,6 +17,8 @@ class MutableDatabase:
         return str(self.data)
     def close(self):
         pass
+
+modules = ["mod_logging","mod_simple_security","mod_default","mod_500_nothing_executed"]
 
 MasterDirectory = "/var/tpm-mirror"
 PackagesDirectory = MasterDirectory + "/packages"
