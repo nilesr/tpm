@@ -1,12 +1,33 @@
+<%!
+import cgi
+%>
+<!doctype html>
 <html>
-<head>
-<title>No static</title>
-<link rel="stylesheet" href="/style.css" />
-<meta http-equiv="refresh" content="5; url=https://www.youtube.com/watch?v=gvdf5n-zI14" />
-</head>
-<body>
-<h2>No static files</h2>
-<div id="content">
-<h3> You will be redirected in five seconds</h3>Stubbornly refusing to serve the static file "${filename}" over this protocol. Please use my implimentation of the mako templating engine, or gtfo.</div>
-</body>
+	<head>
+		<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<title>TPM Package Database</title>
+	</head>
+	<body style="background-color: #E4DDCA;">
+		<nav class="navbar navbar-default navbar-sticky-top" role="navigation">
+			<div class="navbar-header">
+				<a class="navbar-brand" style="font-size:large" href="/">TPM Package Database</a>
+			</div>
+			<div>
+				<ul class="nav navbar-nav">
+					<li><a href="#search">Search</a></li>
+					<!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+					Sign in
+					</button>-->
+				</ul>
+			</div>
+		</nav>
+
+		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container-fluid">
+			<h2>Static files explicitly forbidden</h2>
+			Please email the administrator of the server <a href="mailto:${cgi.escape(config.get("general","email"))}">here</a>.
+		</div>
+	</body>
 </html>
