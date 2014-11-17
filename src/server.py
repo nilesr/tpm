@@ -19,6 +19,7 @@ class MutableDatabase:
         pass
 
 modules = ["mod_logging","mod_simple_security","mod_default","mod_500_nothing_executed"]
+logfile = False
 
 MasterDirectory = "/var/tpm-mirror"
 PackagesDirectory = MasterDirectory + "/packages"
@@ -88,6 +89,16 @@ def GenerateLatestVersions():
 
 def fix_for_wsgiref(st):
 	return [st.encode("utf-8")] # This is because wsgiref is made for python 2 and still hasn't been updated properly
+	
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/modules')
+try:
+	moduleObjects = map(__import__, modules)
+except:
+	print("Fatal error: One or more modules failed to import. Please check your config file, and each module file")
+	sys.exit(1)
+for module in moduleObjects:
+	module.onLoad(log=log,logfile=logfile,root=root,serverError=serverError,config=config,file=__file__,getfield=getfield)
+	
 def serve(environ, start_response):
 	if environ["PATH_INFO"] == "/":
 		start_response("200 OK",  [('Content-type','text/html')])
@@ -115,7 +126,7 @@ ses.start_dht()
 ses.start_upnp()
 
 def NewTorrent(pt):
-	info = lt.torrent_info(lt.bdecode(lt.bencode(pt))) # This is nessescary for some reason
+	info = lt.torrent_info(lt.bdecode(lt.bencode(pt))) # This is necessary for some reason
 	fs = lt.file_storage()
 	lt.add_files(fs,PackagesDirectory)
 	h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 0x001})
