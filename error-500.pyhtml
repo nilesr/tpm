@@ -1,0 +1,26 @@
+<%!
+import cgi, traceback
+%>
+<html>
+<head>
+<link rel="stylesheet" href="/style.css" />
+<title>Error 500 - Internal server error</title>
+</head>
+<body>
+<h2>500 error</h2>
+<div id="content">
+<h3>The server encountered an error processing your request</h3>
+<%
+try:
+	x = kargs['error_string'].replace("\n","<br />")
+except:
+	x = traceback.format_exc()
+%>
+% if bool(int(config.get("general","show_stack_trace_on_error"))):
+${x}
+% endif
+<br />
+Please email the administrator of the server <a href="mailto:${cgi.escape(config.get("general","email"))}">here</a>
+</div>
+</body>
+</html>
