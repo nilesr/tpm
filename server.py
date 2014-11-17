@@ -96,7 +96,7 @@ def fix_for_wsgiref(st):
 mako_server.config = configparser.SafeConfigParser()
 mako_server.config.readfp(open(os.path.dirname(os.path.realpath(__file__))+"/config.conf"))
 
-mako_server.root = mako_server.config["server"]["root"]
+mako_server.root = HTTPRoot
 
 mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", modules)
 

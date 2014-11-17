@@ -1,5 +1,5 @@
 <%!
-import cgi
+import cgi, traceback
 %>
 <!doctype html>
 <html>
@@ -17,7 +17,7 @@ import cgi
 			</div>
 			<div>
 				<ul class="nav navbar-nav">
-					<li><a href="#search">Search</a></li>
+					<li><a href="/">Search</a></li>
 					<!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
 					Sign in
 					</button>-->
