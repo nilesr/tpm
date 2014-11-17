@@ -1,6 +1,6 @@
 import sys,os
 if __name__ == '__main__':
-	print "Do not invoke this directly"
+	print("Do not invoke this directly")
 	sys.exit(1)
 #**
 #* Loads the relevant configuration options, and logs a message
@@ -15,6 +15,8 @@ def onLoad(**kargs):
 		order = kargs['config'].get("mod_logging","order").split(kargs['config'].get("general","listDelimiter"))
 	except:
 		kargs['log']("There is a problem in your mod_logging configuration")
+		import traceback
+		kargs["log"](traceback.format_exc())
 		sys.exit(1)
 	kargs['log']("Logging module loaded")
 #**
