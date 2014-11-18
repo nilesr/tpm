@@ -1,0 +1,61 @@
+<%!
+import cgi, time
+%>
+<%
+for filter in ["name","version","datecomparator","datepicker"]:
+	try:
+		tempvar = d[filter]
+	except:
+		d[filter] = False
+if d["datepicker"]:
+	epochdate = int(time.mktime(time.strptime(d["datepicker"], "%m/%d/%Y")))
+%>
+<!doctype html>
+<html>
+	<body>
+		<table id="searchTextResults">
+			<thead>
+				<tr><th>Name</th><th>Version</th><th>Filename</th><th>sha256</th></tr>
+			</thead>
+			<tbody>
+				% for name,versionData in extras['packages'].items():
+					% for version in versionData:
+						<% 
+							if d["name"] != False and not d["name"] in name:
+								continue
+							if d["version"] != False and not d["version"] in version["Version"]:
+								continue
+							if not d["datecomparator"] == "lt" and version["RepeaseEpoch"] < epochdate:
+								return
+							if not d["datecomparator"] == "lte" and version["RepeaseEpoch"] <= epochdate:
+								return
+							if not d["datecomparator"] == "gt" and version["RepeaseEpoch"] > epochdate:
+								return
+							if not d["datecomparator"] == "gte" and version["RepeaseEpoch"] >= epochdate:
+								return
+							if not d["datecomparator"] == "eq" and version["RepeaseEpoch"] >= epochdate and not version["RepeaseEpoch"] <= epochdate + (24*3600):
+								return
+							%>
+						<tr>
+							<td>${name}</td>
+							<td>${version["Version"]}</td>
+							<td>
+							% if version.get('Filename',"nil") == "nil":
+								% for x in extras['packages'][name]:
+									% if x["Version"] == version.get("LatestVersion"):
+										${x["Filename"]}
+										<% tempfilename=x["Filename"]; break %>
+									% endif
+								% endfor
+							% else:
+								${version['Filename']}
+								<% tempfilename=version['Filename'] %>
+							% endif
+							<td>${extras['hashes'].get(tempfilename)[0].get("Hash","nil")}</td>
+						</tr>
+					% endfor
+				% endfor
+			</tbody>
+		</table>
+	</body>
+</html>

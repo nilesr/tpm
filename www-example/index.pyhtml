@@ -5,6 +5,8 @@
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+		<script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 		<title>TPM Package Database</title>
 		<style>
 			th {padding: 0px 5px;}
@@ -14,40 +16,46 @@
 			function loadHeader() {
 				$( "#header" ).load( "header.html" );
 			}
+			function loadshit() {
+				$( "#results" ).load( "results.pyhtml", { 
+					'name': $("#name").val(), 
+					'version': $("#version").val(), 
+					'datecomparator': $("#datecomparator").val(), 
+					'datepicker': $("#datepicker").val(), 
+				});
+			}
+			$(function() {
+				$( "#datepicker" ).datepicker();
+			});
 		</script>
 	</head>
 	<body style="background-color: #E4DDCA;" onload="loadHeader();">
 		<div id="header"></div>
 		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container">
-			Search: <input>
-			<table id="searchTextResults">
-				<thead>
-					<tr><th>Name</th><th>Version</th><th>Filename</th><th>sha256</th></tr>
-				</thead>
-				<tbody>
-					% for name,versionData in extras['packages'].items(): # TODO
-						% for version in versionData:
-							<tr>
-								<td>${name}</td>
-								<td>${version["Version"]}</td>
-								<td>
-								% if version.get('Filename',"nil") == "nil":
-									% for x in extras['packages'][name]:
-										% if x["Version"] == version.get("LatestVersion"):
-											${x["Filename"]}
-											<% tempfilename=x["Filename"]; break %>
-										% endif
-									% endfor
-								% else:
-									${version['Filename']}
-									<% tempfilename=version['Filename'] %>
-								% endif
-								<td>${extras['hashes'].get(tempfilename)[0].get("Hash","nil")}</td>
-							</tr>
-						% endfor
-					% endfor
-				</tbody>
-			</table>
+			<form oninput="loadshit();">
+				<div style="display:inline-block;">
+					Package name<br />
+					<input type="text" name="name" id="name" />
+				</div>
+				<div style="display:inline-block;">
+					Version<br />
+					<input type="text" name="version" id="version" />
+				</div>
+				<div style="display:inline-block;">
+					Release Date<br />
+					<select name="datecomparator" id="datecomparator">
+						<option value="eq">=</option>
+						<option value="lt">&lt;</option>
+						<option value="lte">&lt;=</option>
+						<option value="gt">&gt;</option>
+						<option value="ge">&gt;=</option>
+					</select>
+					<input type="text" id="datepicker">
+				</div>
+				<br />
+			</form>
+			<br />
+			<div id="results"></div>
 		</div>
 	</body>
 </html>
