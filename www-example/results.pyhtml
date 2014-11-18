@@ -9,6 +9,7 @@ for filter in ["name","version","datecomparator","datepicker"]:
 			d[filter] = False
 	except:
 		d[filter] = False
+epochdate = False
 if d["datepicker"]:
 	epochdate = int(time.mktime(time.strptime(d["datepicker"], "%m/%d/%Y")))
 %>
@@ -27,16 +28,20 @@ if d["datepicker"]:
 								continue
 							if d["version"] != False and not d["version"] in version["Version"]:
 								continue
-							if not d["datecomparator"] == "lt" and version["RepeaseEpoch"] < epochdate:
-								return
-							if not d["datecomparator"] == "lte" and version["RepeaseEpoch"] <= epochdate:
-								return
-							if not d["datecomparator"] == "gt" and version["RepeaseEpoch"] > epochdate:
-								return
-							if not d["datecomparator"] == "gte" and version["RepeaseEpoch"] >= epochdate:
-								return
-							if not d["datecomparator"] == "eq" and version["RepeaseEpoch"] >= epochdate and not version["RepeaseEpoch"] <= epochdate + (24*3600):
-								return
+							if not version.get("ReleaseEpoch",None) == None:
+								if d["datecomparator"] == "lt" and not version["ReleaseEpoch"] < epochdate:
+									continue
+								if d["datecomparator"] == "lte" and not version["ReleaseEpoch"] <= epochdate:
+									continue
+								if d["datecomparator"] == "gt" and not version["ReleaseEpoch"] > epochdate:
+									continue
+								if d["datecomparator"] == "gte" and not version["ReleaseEpoch"] >= epochdate:
+									continue
+								if d["datecomparator"] == "eq" and not version["ReleaseEpoch"] <= epochdate and not version["ReleaseEpoch"] >= epochdate + (24*3600): # FIXME
+									continue
+							else:
+								if epochdate:
+									continue
 							%>
 						<tr>
 							<td>${name}</td>
