@@ -40,6 +40,22 @@ tstatus = False
 master = BTEdb.Database(MasterDirectory+"/package-index.json")
 hashes = BTEdb.Database(MasterDirectory+"/hashes.json")
 
+mako_server.config = configparser.SafeConfigParser()
+mako_server.config.readfp(open(os.path.dirname(os.path.realpath(__file__))+"/config.conf"))
+
+mako_server.root = HTTPRoot
+
+mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", modules)
+
+ses = lt.session()
+ses.listen_on(6881, 6891)
+ses.start_dht()
+ses.start_upnp()
+mimetypes.init()
+print("Generating package index")
+GenerateAll()
+print("Generated package index")
+
 def RegeneratePackageIndex():
 	if not master.TransactionInProgress:
 		master.BeginTransaction(False)
@@ -94,15 +110,6 @@ def GenerateLatestVersions():
 def fix_for_wsgiref(st):
 	return [st.encode("utf-8")] # This is because wsgiref is made for python 2 and still hasn't been updated properly
 
-
-mako_server.config = configparser.SafeConfigParser()
-mako_server.config.readfp(open(os.path.dirname(os.path.realpath(__file__))+"/config.conf"))
-
-mako_server.root = HTTPRoot
-
-mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", modules)
-
-	
 def serve(environ, start_response):
 #	if environ["PATH_INFO"] == "/":
 #		start_response("200 OK",  [('Content-type','text/html')])
@@ -127,11 +134,6 @@ def GenerateTorrent():
 	#lt.set_piece_hashes(t,MasterDirectory) # Not working
 	return t.generate()
 
-ses = lt.session()
-ses.listen_on(6881, 6891)
-ses.start_dht()
-ses.start_upnp()
-
 def NewTorrent(pt):
 	info = lt.torrent_info(lt.bdecode(lt.bencode(pt))) # This is necessary for some reason
 	fs = lt.file_storage()
@@ -147,19 +149,10 @@ def GenerateAll():
 	torrent = GenerateTorrent()
 	tstatus = NewTorrent(torrent)
 
-mimetypes.init()
-print("Generating package index")
-GenerateAll()
-print("Generated package index")
 
 def webserver():
 	server = wsgiref.simple_server.make_server("",5001,serve)
 	server.serve_forever()
-
-webthread = threading.Thread(target=webserver)
-webthread.daemon = False # Important
-webthread.start()
-print("Serving on port 5001")
 
 def RegenerateTimer():
 	while True:
@@ -169,6 +162,11 @@ def RegenerateTimer():
 		print("Regenerating package index and torrentfile")
 		GenerateAll()
 		print("Regeneration terminated")
+
+webthread = threading.Thread(target=webserver)
+webthread.daemon = False # Important
+webthread.start()
+print("Serving on port 5001")
 
 rthread = threading.Thread(target=RegenerateTimer)
 rthread.daemon = False
