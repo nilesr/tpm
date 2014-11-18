@@ -44,6 +44,7 @@
 				<div style="display:inline-block;">
 					Release Date<br />
 					<select name="datecomparator" id="datecomparator">
+						<option value="" selected="selected">None</option>
 						<option value="eq">=</option>
 						<option value="lt">&lt;</option>
 						<option value="lte">&lt;=</option>
