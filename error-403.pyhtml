@@ -9,22 +9,14 @@ import cgi
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 		<title>TPM Package Database</title>
+		<script>
+			function loadHeader() {
+				$( "#header" ).load( "header.html" );
+			}
+		</script>
 	</head>
-	<body style="background-color: #E4DDCA;">
-		<nav class="navbar navbar-default navbar-sticky-top" role="navigation">
-			<div class="navbar-header">
-				<a class="navbar-brand" style="font-size:large" href="/">TPM Package Database</a>
-			</div>
-			<div>
-				<ul class="nav navbar-nav">
-					<li><a href="/">Search</a></li>
-					<!--<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
-					Sign in
-					</button>-->
-				</ul>
-			</div>
-		</nav>
-
+	<body style="background-color: #E4DDCA;" onload="loadHeader();">
+		<div id="header"></div>
 		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container-fluid">
 			<h2>403 error</h2>
 			<h3>You do not have permission to view <span style="background-color:lightgrey;border:1px solid grey;border-radius:4px;">${cgi.escape(filename)}</span></h3>
