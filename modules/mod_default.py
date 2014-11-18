@@ -21,7 +21,7 @@ def onLoad(**kargs):
 #* @author			Niles Rogoff <nilesrogoff@gmail.com>
 #* @version			devel/unreleased
 #* @since			2014-01-29
-#* @params			function start_response, dictionary environ, function log, string logfile, string root, function serverError, object config, string file, function getfield
+#* @params			function start_response, dictionary environ, function log, string logfile, string root, function serverError, object config, string file, function getfield, dictionary extras
 #* @returns			string a rendered mako file or a static file or a directory listing or a 404 error or a 403 or a 500 error, dictionary environment
 def onRequest(**kargs):
 	#**
@@ -58,13 +58,13 @@ def onRequest(**kargs):
 		if not os.path.exists(filename):
 			if listdirectories:
 				try:
+					kargs["log"](kargs)
 					rendered = TemplateLookup(directories=os.path.dirname(os.path.realpath(kargs["file"])),filesystem_checks=True, module_directory=os.path.dirname(os.path.realpath(kargs["file"]))+'/temporary_files').get_template("list.pyhtml").render(filename=filename,config=kargs["config"],d=d,uri=uri)
 					kargs["start_response"]("200 OK", [('Content-type','text/html')])
 					return rendered, kargs['environ']
 				except OSError:
 					return kargs["serverError"](kargs["start_response"],403,uri), kargs['environ']
 				except:
-					kargs['log'](traceback.format_exc())
 					return kargs["serverError"](kargs["start_response"],500), kargs['environ']
 			else:
 				return kargs["serverError"](kargs["start_response"],403,uri), kargs['environ']
@@ -72,7 +72,7 @@ def onRequest(**kargs):
 	#* If the uri ends with .pyhtml, attempt to serve the file using mako
 	if re.match(r'.*\.pyhtml$', uri):
 		try:
-			rendered = TemplateLookup(directories=[kargs["root"]], filesystem_checks=True, module_directory=os.path.dirname(os.path.realpath(kargs["file"]))+'/temporary_files').get_template(uri).render(d=d,uri=uri,environ=kargs["environ"])
+			rendered = TemplateLookup(directories=[kargs["root"]], filesystem_checks=True, module_directory=os.path.dirname(os.path.realpath(kargs["file"]))+'/temporary_files').get_template(uri).render(d=d,uri=uri,environ=kargs["environ"], extras=kargs['extras'])
 			kargs["start_response"]("200 OK", [('Content-type','text/html')])
 			return rendered, kargs['environ']
 		except exceptions.TopLevelLookupException as xxx_todo_changeme:
@@ -94,8 +94,9 @@ def onRequest(**kargs):
 				try:
 					#**
 					#* This is very slow, because we load the entire file, then pass it up. There is probably a way to speed this up, but until then it's going to take like 0.7 seconds to load a 4 kilobyte file
-					rendered = file(filename).read()
+					rendered = open(filename).read()
 				except:
+					kargs["log"](traceback.format_exc())
 					return kargs["serverError"](kargs["start_response"],403,uri), kargs['environ']
 				kargs["start_response"]("200 OK", [('Content-type',mime)])
 				if not rendered:

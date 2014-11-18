@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 sys.path.append("/usr/local/lib/python2.7/site-packages/")
-import cgi, re, os, mimetypes, configparser, subprocess, glob, signal, time,traceback, threading
+import cgi, re, os, mimetypes, ConfigParser, subprocess, glob, signal, time,traceback, threading
 from mako.lookup import TemplateLookup
 
 #**
@@ -18,8 +18,8 @@ def log(missive):
 			logfileobject.write(sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + missive + "\r\n")
 			logfileobject.close()
 		except OSError:
-			print("Error opening logfile. Non-fatal")
-	print(sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + missive)
+			print "Error opening logfile. Non-fatal"
+	print sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + missive
 #**
 #* Sends an error message to the client
 #* <p>
@@ -110,7 +110,7 @@ def start_with_ssl():
 def load_modules(directory, modlist):
 	sys.path.append(directory)
 	try:
-		moduleObjects = list(map(__import__, modlist))
+		moduleObjects = map(__import__, modlist)
 	except:
 		log("Fatal error: One or more modules failed to import. Please check your config file, and each module file")
 		sys.exit(1)
@@ -138,7 +138,7 @@ if __name__ == '__main__':
 	mimetypes.init()
 	#**
 	#* Reads the configuration file.
-	config = configparser.SafeConfigParser()
+	config = ConfigParser.SafeConfigParser()
 #	configfile = os.path.dirname(os.path.realpath(__file__)) + "/config.conf"
 	logfile = False
 	#**
@@ -165,7 +165,7 @@ if __name__ == '__main__':
 		try:
 			#sihipsterm = getattr(signal,i)
 			signal.signal(i,signaled)
-		except RuntimeError as m:
+		except RuntimeError,m:
 			pass
 	#**
 	#* I have NO IDEA why, but if you don't start python with -O, it throws NoneType and "write() argument must be string" exceptions, then just closes the connection. 

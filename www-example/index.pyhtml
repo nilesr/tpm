@@ -6,6 +6,10 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 		<title>TPM Package Database</title>
+		<style>
+			th {padding: 0px 5px;}
+			td {padding: 0px 4px;}
+		</style>
 	</head>
 	<body style="background-color: #E4DDCA;">
 		<nav class="navbar navbar-default navbar-sticky-top" role="navigation">
@@ -22,19 +26,34 @@
 			</div>
 		</nav>
 
-		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container-fluid">
+		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container">
 			Search: <input ng-model="searchText">
 			<table id="searchTextResults">
 				<thead>
-					<tr><th>Name</th><th>Phone</th></tr>
+					<tr><th>Name</th><th>Version</th><th>Filename</th><th>sha256</th></tr>
 				</thead>
 				<tbody>
-					% for x in stuff: # TODO
-						<tr>
-							<td></td>
-							<td></td>
-						</tr>
-					% endif
+					% for name,versionData in extras['packages'].items(): # TODO
+						% for version in versionData:
+							<tr>
+								<td>${name}</td>
+								<td>${version["Version"]}</td>
+								<td>
+								% if version.get('Filename',"nil") == "nil":
+									% for x in extras['packages'][name]:
+										% if x["Version"] == version.get("LatestVersion"):
+											${x["Filename"]}
+											<% tempfilename=x["Filename"]; break %>
+										% endif
+									% endfor
+								% else:
+									${version['Filename']}
+									<% tempfilename=version['Filename'] %>
+								% endif
+								<td>${extras['hashes'].get(tempfilename)[0].get("Hash","nil")}</td>
+							</tr>
+						% endfor
+					% endfor
 				</tbody>
 			</table>
 		</div>

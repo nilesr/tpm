@@ -25,7 +25,7 @@ logfile = False
 
 MasterDirectory = "/var/tpm-mirror"
 PackagesDirectory = MasterDirectory + "/packages"
-HTTPRoot = MasterDirectory + "/www"
+HTTPRoot = MasterDirectory + "/www/"
 
 if not os.path.isdir(MasterDirectory):
 	os.mkdir(MasterDirectory)
@@ -38,7 +38,7 @@ torrent = ""
 tstatus = False
 
 master = BTEdb.Database(MasterDirectory+"/package-index.json")
-master = BTEdb.Database(MasterDirectory+"/hashes.json")
+hashes = BTEdb.Database(MasterDirectory+"/hashes.json")
 
 def RegeneratePackageIndex():
 	if not master.TransactionInProgress:
@@ -53,18 +53,20 @@ def RegeneratePackageIndex():
 			VersionsAlreadyDone = []
 			for version in master.Dump(PackageDatapoint["PackageName"]):
 				VersionsAlreadyDone.insert(0,version["Version"])
+			packagefileobj = open(packagefile, "rb")
 			if not PackageDatapoint["Version"] in VersionsAlreadyDone:
 				x = []
 				for y,z in PackageDatapoint.items():
 					x.insert(0,[y,z]) # X becomes a list of lists, each list inside x is a key-value pair for properties of a package
-				packagefileobj = open(packagefile, "rb")
 				master.Insert(PackageDatapoint["PackageName"], Filename = os.path.basename(packagefile), *x) # Gets the filename and also appends all the elements of x to the end of the methodcall
-				if len(hashes.Dump(PackageDatapoint["PackageName"])) == 0:
-					hashes.Insert(PackageDatapoint["PackageName"], Hash = hashlib.sha256(packagefileobj.read()).hexdigest())
-				else:
-					hashes.Update(PackageDatapoint["PackageName"], hashes.Dump(PackageDatapoint["PackageName"]), Hash = hashlib.sha256(packagefileobj.read()).hexdigest())
+			if not hashes.TableExists(os.path.basename(packagefile)):
+				hashes.Create(os.path.basename(packagefile))
+			if len(hashes.Dump(os.path.basename(packagefile))) == 0:
+				hashes.Insert(os.path.basename(packagefile), Hash = hashlib.sha256(packagefileobj.read()).hexdigest())
+			else:
+				hashes.Update(os.path.basename(packagefile), hashes.Dump(os.path.basename(packagefile)), Hash = hashlib.sha256(packagefileobj.read()).hexdigest())
 
-				packagefileobj.close()
+			packagefileobj.close()
 		except:
 			print(traceback.format_exc())
 			continue
@@ -102,9 +104,9 @@ mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.rea
 
 	
 def serve(environ, start_response):
-	if environ["PATH_INFO"] == "/":
-		start_response("200 OK",  [('Content-type','text/html')])
-		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.html'" /></head><body>Redirecting...</body></html>""")
+#	if environ["PATH_INFO"] == "/":
+#		start_response("200 OK",  [('Content-type','text/html')])
+#		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.pyhtml'" /></head><body>Redirecting...</body></html>""")
 	if environ["PATH_INFO"].lower()[-len("torrent"):] == "torrent":
 		start_response("200 OK", [('Content-type','application/x-bittorrent')])
 		return fix_for_wsgiref(lt.bencode(torrent))
@@ -114,7 +116,7 @@ def serve(environ, start_response):
 	if environ["PATH_INFO"].lower() == "/hashes.json":
 		start_response("200 OK",  [('Content-type','application/json')])
 		return fix_for_wsgiref(json.dumps(hashes.master))
-	return fix_for_wsgiref(mako_server.serve(environ, start_response))
+	return fix_for_wsgiref(mako_server.serve(environ, start_response, packages = master.master, hashes = hashes.master))
 
 def GenerateTorrent():
 	fs = lt.file_storage()
@@ -141,11 +143,14 @@ def NewTorrent(pt):
 
 def GenerateAll():
 	global torrent,tstatus
-	RegeneratePackageIndex
+	RegeneratePackageIndex()
 	torrent = GenerateTorrent()
 	tstatus = NewTorrent(torrent)
 
 mimetypes.init()
+print("Generating package index")
+GenerateAll()
+print("Generated package index")
 
 def webserver():
 	server = wsgiref.simple_server.make_server("",5001,serve)
@@ -157,9 +162,6 @@ webthread.start()
 print("Serving on port 5001")
 
 def RegenerateTimer():
-	print("Generating package index")
-	GenerateAll()
-	print("Generated package index")
 	while True:
 		tosleep = 12*3600 - (int(time.time()) % (12*3600))
 		print("Sleeping " + str(tosleep) + " seconds")
