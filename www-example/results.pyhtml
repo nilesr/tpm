@@ -5,6 +5,8 @@ import cgi, time
 for filter in ["name","version","datecomparator","datepicker"]:
 	try:
 		tempvar = d[filter]
+		if tempvar == "":
+			d[filter] = False
 	except:
 		d[filter] = False
 if d["datepicker"]:
