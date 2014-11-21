@@ -52,9 +52,7 @@ ses.listen_on(6881, 6891)
 ses.start_dht()
 ses.start_upnp()
 mimetypes.init()
-print("Generating package index")
-GenerateAll()
-print("Generated package index")
+
 
 def RegeneratePackageIndex():
 	if not master.TransactionInProgress:
@@ -149,6 +147,9 @@ def GenerateAll():
 	torrent = GenerateTorrent()
 	tstatus = NewTorrent(torrent)
 
+print("Generating package index")
+GenerateAll()
+print("Generated package index")
 
 def webserver():
 	server = wsgiref.simple_server.make_server("",5001,serve)
