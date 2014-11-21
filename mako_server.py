@@ -15,11 +15,11 @@ def log(missive):
 	if logfile:
 		try:
 			logfileobject = open(logfile,'a')
-			logfileobject.write(sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + missive + "\r\n")
+			logfileobject.write(sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + str(missive) + "\r\n")
 			logfileobject.close()
 		except OSError:
 			print("Error opening logfile. Non-fatal")
-	print(sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + missive)
+	print(sys.argv[0] + " " + time.strftime("%d/%m/%Y %H:%M:%S") + "\t" + str(missive))
 #**
 #* Sends an error message to the client
 #* <p>

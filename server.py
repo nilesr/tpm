@@ -20,7 +20,6 @@ class MutableDatabase:
     def close(self):
         pass
 
-modules = ["mod_logging","mod_simple_security","mod_default","mod_500_nothing_executed"]
 logfile = False
 
 MasterDirectory = "/var/tpm-mirror"
@@ -45,7 +44,7 @@ mako_server.config.readfp(open(os.path.dirname(os.path.realpath(__file__))+"/con
 
 mako_server.root = HTTPRoot
 
-mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", modules)
+mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", mako_server.config["server"]["modules"].split(mako_server.config["general"]["listDelimiter"]))
 
 ses = lt.session()
 ses.listen_on(6881, 6891)

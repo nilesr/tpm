@@ -16,7 +16,7 @@ if d["datepicker"]:
 <!doctype html>
 <html>
 	<body>
-		<table id="searchTextResults">
+		<table id="searchTextResults" class="table table-bordered table-striped">
 			<thead>
 				<tr><th>Name</th><th>Version</th><th>Filename</th><th>sha256</th></tr>
 			</thead>
@@ -24,9 +24,9 @@ if d["datepicker"]:
 				% for name,versionData in extras['packages'].items():
 					% for version in versionData:
 						<% 
-							if d["name"] != False and not d["name"] in name:
+							if d["name"] != False and not d["name"].upper() in name.upper():
 								continue
-							if d["version"] != False and not d["version"] in version["Version"]:
+							if d["version"] != False and not d["version"].upper() in version["Version"].upper():
 								continue
 							if not version.get("ReleaseEpoch",None) == None:
 								if d["datecomparator"] == "lt" and not version["ReleaseEpoch"] < epochdate:

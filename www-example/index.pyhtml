@@ -16,7 +16,7 @@
 			function loadHeader() {
 				$( "#header" ).load( "header.html" );
 			}
-			function loadshit() {
+			function loadResults() {
 				$( "#results" ).load( "results.pyhtml", { 
 					'name': $("#name").val(), 
 					'version': $("#version").val(), 
@@ -29,10 +29,10 @@
 			});
 		</script>
 	</head>
-	<body style="background-color: #E4DDCA;" onload="loadHeader();">
+	<body style="background-color: #E4DDCA;" onload="loadHeader();loadResults()">
 		<div id="header"></div>
 		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container">
-			<form oninput="loadshit();">
+			<form oninput="loadResults();">
 				<div style="display:inline-block;">
 					Package name<br />
 					<input type="text" name="name" id="name" />
