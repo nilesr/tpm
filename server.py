@@ -133,7 +133,7 @@ def GenerateTorrent():
 	return t.generate()
 
 def NewTorrent(pt):
-	info = lt.torrent_info(lt.bdecode(lt.bencode(pt))) # This is necessary for some reason
+	info = lt.torrent_info(pt) # This is necessary for some reason
 	fs = lt.file_storage()
 	lt.add_files(fs,PackagesDirectory)
 	h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 0x001})
