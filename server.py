@@ -34,27 +34,7 @@ if not os.path.isdir(PackagesDirectory):
 if not os.path.isdir(HTTPRoot):
 	os.mkdir(HTTPRoot)
 
-torrent = ""
-tstatus = False
 
-master = BTEdb.Database(MasterDirectory+"/package-index.json")
-hashes = BTEdb.Database(MasterDirectory+"/hashes.json")
-
-mako_server.config = configparser.SafeConfigParser()
-mako_server.config.readfp(open(os.path.dirname(os.path.realpath(__file__))+"/config.conf"))
-
-mako_server.root = HTTPRoot
-
-mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", modules)
-
-ses = lt.session()
-ses.listen_on(6881, 6891)
-ses.start_dht()
-ses.start_upnp()
-mimetypes.init()
-print("Generating package index")
-GenerateAll()
-print("Generated package index")
 
 def RegeneratePackageIndex():
 	if not master.TransactionInProgress:
@@ -172,3 +152,25 @@ rthread = threading.Thread(target=RegenerateTimer)
 rthread.daemon = False
 rthread.start()
 print("Regenerating package index every 12 hours")
+
+torrent = ""
+tstatus = False
+
+master = BTEdb.Database(MasterDirectory+"/package-index.json")
+hashes = BTEdb.Database(MasterDirectory+"/hashes.json")
+
+mako_server.config = configparser.SafeConfigParser()
+mako_server.config.readfp(open(os.path.dirname(os.path.realpath(__file__))+"/config.conf"))
+
+mako_server.root = HTTPRoot
+
+mako_server.moduleObjects = mako_server.load_modules(os.path.dirname(os.path.realpath(__file__)) + "/modules", modules)
+
+ses = lt.session()
+ses.listen_on(6881, 6891)
+ses.start_dht()
+ses.start_upnp()
+mimetypes.init()
+print("Generating package index")
+GenerateAll()
+print("Generated package index")
