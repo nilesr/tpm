@@ -105,7 +105,7 @@ def GenerateLatestVersions():
 	master.CommitTransaction()
 
 def fix_for_wsgiref(st):
-	return [st.encode("utf-8")] # This is because wsgiref is made for python 2 and still hasn't been updated properly
+	return [st] # This is because wsgiref is made for python 2 and still hasn't been updated properly
 
 def serve(environ, start_response):
 #	if environ["PATH_INFO"] == "/":
@@ -128,17 +128,17 @@ def GenerateTorrent():
 	t = lt.create_torrent(fs, flags = 1&8&16) # 16 does nothing right now
 	#t = lt.create_torrent(fs)
 	t.add_tracker("udp://tracker.publicbt.com:80")
-	#lt.set_piece_hashes(t,MasterDirectory) # Not working
+	lt.set_piece_hashes(t,MasterDirectory)# ## Not working
 	return t.generate()
 
 def NewTorrent(pt):
 	info = lt.torrent_info(pt) # This is necessary for some reason
 	fs = lt.file_storage()
 	lt.add_files(fs,PackagesDirectory)
-	h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 0x001})
-	s = h.status()
+	h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 1})
+	#h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs })
 	print("New torrent added")
-	return s
+	return h
 
 def GenerateAll():
 	global torrent,tstatus
@@ -155,6 +155,10 @@ def webserver():
 	server.serve_forever()
 
 def RegenerateTimer():
+	state_str = ['queued', 'checking', 'downloading metadata', 'downloading', 'finished', 'seeding', 'allocating']
+	while True:
+		print(state_str[tstatus.status().state])
+		time.sleep(1)
 	while True:
 		tosleep = 12*3600 - (int(time.time()) % (12*3600))
 		print("Sleeping " + str(tosleep) + " seconds")

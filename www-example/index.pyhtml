@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 		<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+		<link rel="stylesheet" href="/style.css">
 		<script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 		<title>TPM Package Database</title>
 		<style>
@@ -29,9 +30,9 @@
 			});
 		</script>
 	</head>
-	<body style="background-color: #E4DDCA;" onload="loadHeader();loadResults()">
-		<div id="header"></div>
-		<div style="background-color:#f8f8f8; padding:30px; position:relative; margin-left:auto; margin-right:auto; width:80%" class="container">
+	<body onload="loadHeader();loadResults()">
+		<div class="containter" id="header"></div>
+		<div style="padding:30px; position:relative; margin-left:auto; margin-right:auto; width:100%" class="container">
 			<form oninput="loadResults();">
 				<div style="display:inline-block;">
 					Package name<br />
