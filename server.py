@@ -158,7 +158,8 @@ def RegenerateTimer():
 	state_str = ['queued', 'checking', 'downloading metadata', 'downloading', 'finished', 'seeding', 'allocating']
 	while True:
 		print(state_str[tstatus.status().state])
-		time.sleep(1)
+		tstatus.scrape_tracker()
+		time.sleep(30)
 	while True:
 		tosleep = 12*3600 - (int(time.time()) % (12*3600))
 		print("Sleeping " + str(tosleep) + " seconds")
