@@ -5,20 +5,20 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 import glob, BTEdb, os, tarfile, traceback, mimetypes, wsgiref.simple_server, hashlib, json, threading, time, mako_server, configparser
 import libtorrent as lt
 class MutableDatabase:
-    def seek(self,position,mode):
-        pass
-    def truncate(self):
-        pass
-    def __init__(self, data=""):
-        self.data = data
-    def write(self,data):
-        self.data = data
-    def flush(self):
-        return False
-    def read(self):
-        return str(self.data)
-    def close(self):
-        pass
+	def seek(self,position,mode):
+		pass
+	def truncate(self):
+		pass
+	def __init__(self, data=""):
+		self.data = data
+	def write(self,data):
+		self.data = data
+	def flush(self):
+		return False
+	def read(self):
+		return str(self.data)
+	def close(self):
+		pass
 
 logfile = False
 
@@ -127,7 +127,7 @@ def GenerateTorrent():
 	lt.add_files(fs, PackagesDirectory)
 	t = lt.create_torrent(fs, flags = 1&8&16) # 16 does nothing right now
 	#t = lt.create_torrent(fs)
-	t.add_tracker("udp://tracker.publicbt.com:80")
+	t.add_tracker("http://tpm.blogwithme.net:81/tracker")
 	lt.set_piece_hashes(t,MasterDirectory)# ## Not working
 	return t.generate()
 
@@ -135,7 +135,7 @@ def NewTorrent(pt):
 	info = lt.torrent_info(pt) # This is necessary for some reason
 	fs = lt.file_storage()
 	lt.add_files(fs,PackagesDirectory)
-	h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 1})
+	h = ses.add_torrent({"save_path": MasterDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs, "flags": 1})
 	#h = ses.add_torrent({"save_path": PackagesDirectory, "storage_mode": lt.storage_mode_t.storage_mode_sparse, "ti": info, "storage": fs })
 	print("New torrent added")
 	return h
@@ -157,8 +157,10 @@ def webserver():
 def RegenerateTimer():
 	state_str = ['queued', 'checking', 'downloading metadata', 'downloading', 'finished', 'seeding', 'allocating']
 	while True:
-		print(state_str[tstatus.status().state])
-		tstatus.scrape_tracker()
+		s = tstatus.status()
+		print('\r%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % (s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000, s.num_peers, state_str[s.state]))
+		print("Next announce: %s" % str(s.next_announce))
+		tstatus.force_reannounce()
 		time.sleep(30)
 	while True:
 		tosleep = 12*3600 - (int(time.time()) % (12*3600))
