@@ -104,7 +104,9 @@ def GenerateLatestVersions():
 			master.Update(package, master.Select(package, Version = "Latest"), LatestVersion = PackageLatestVersion)
 	master.CommitTransaction()
 
-def fix_for_wsgiref(st):
+def fix_for_wsgiref(st, encode = "utf-8"):
+	if encode != False:
+		return [st.encode(encode)]
 	return [st] # This is because wsgiref is made for python 2 and still hasn't been updated properly
 
 def serve(environ, start_response):
@@ -113,7 +115,7 @@ def serve(environ, start_response):
 #		return fix_for_wsgiref("""<!doctype html><html><head><meta http-equiv="refresh" content="0;URL='/index.pyhtml'" /></head><body>Redirecting...</body></html>""")
 	if environ["PATH_INFO"].lower()[-len("torrent"):] == "torrent":
 		start_response("200 OK", [('Content-type','application/x-bittorrent')])
-		return fix_for_wsgiref(lt.bencode(torrent))
+		return fix_for_wsgiref(lt.bencode(torrent), False)
 	if environ["PATH_INFO"].lower() == "/package-index.json":
 		start_response("200 OK",  [('Content-type','application/json')])
 		return fix_for_wsgiref(json.dumps(master.master)) # Only return master, don't want to send any triggers or savepoints
