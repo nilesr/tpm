@@ -33,7 +33,7 @@ def sizeof(num):
 		</style>
 		<script>
 			function loadHeader() {
-				$( "#header" ).load( "header.html" );
+				$( "#header" ).load( "/header.html" );
 			}
 		</script>
 	</head>
