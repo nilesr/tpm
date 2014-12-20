@@ -1,1 +1,1 @@
-[{"info": [{"Description": "Example Libraries", "Maintainer": "Ethan Sattler", "Version": "0.1", "Type": "Binary", "Dependancies": [], "ReleaseEpoch": 2014, "PackageName":"libfoo"}]}, {}, []]
+[{"info": [{"Description": "Example Libraries", "Maintainer": "Ethan Sattler", "Version": "0.1", "Type": "Binary", "Dependancies": [], "ReleaseEpoch": 2014, "PackageName":"libfoo", "Architecture": "x86_64"}]}, {}, []]

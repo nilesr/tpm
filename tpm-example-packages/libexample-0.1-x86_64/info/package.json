@@ -1,1 +1,1 @@
-[{"info": [{"Description": "Example Libraries", "Maintainer": "Niles Rogoff", "Version": "0.1", "Type": "Binary", "Dependancies": [], "ReleaseEpoch": 12, "PackageName":"libexample"}]}, {}, []]
+[{"info": [{"Description": "Example Libraries", "Maintainer": "Niles Rogoff", "Version": "0.1", "Type": "Binary", "Dependancies": [], "ReleaseEpoch": 12, "PackageName":"libexample", "Architecture": "x86_64"}]}, {}, []]
