@@ -1,11 +1,15 @@
 <%!
-import hashlib
+	import hashlib
 %>
 <%
-try:
-	tempvar = d["hash"]
-except:
-	return
+	try:
+		tempvar = d["hash"]
+	except:
+		return
+	try:
+		temp = extras["hashes"][d["hash"]][0]["Hash"]
+	except:
+		temp = "404 - Package not found"
 %>
-${extras["hashes"][d["hash"]][0]["Hash"]}
+${temp}
 
