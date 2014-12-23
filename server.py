@@ -156,7 +156,7 @@ def webserver():
 	server = wsgiref.simple_server.make_server("",5001,serve)
 	server.serve_forever()
 
-def RegenerateTimer():
+def ReannounceDaemon():
 	state_str = ['queued', 'checking', 'downloading metadata', 'downloading', 'finished', 'seeding', 'allocating']
 	while True:
 		s = tstatus.status()
@@ -164,6 +164,7 @@ def RegenerateTimer():
 		print("Next announce: %s" % str(s.next_announce))
 		tstatus.force_reannounce()
 		time.sleep(30)
+def RegenerateTimer():
 	while True:
 		tosleep = 12*3600 - (int(time.time()) % (12*3600))
 		print("Sleeping " + str(tosleep) + " seconds")
@@ -177,7 +178,12 @@ webthread.daemon = False # Important
 webthread.start()
 print("Serving on port 5001")
 
-rthread = threading.Thread(target=RegenerateTimer)
-rthread.daemon = False
-rthread.start()
+rtthread = threading.Thread(target=RegenerateTimer)
+rtthread.daemon = False
+rtthread.start()
+print("Regenerating package index every 12 hours")
+
+rdthread = threading.Thread(target=ReannounceDaemon)
+rdthread.daemon = False
+rdthread.start()
 print("Regenerating package index every 12 hours")
