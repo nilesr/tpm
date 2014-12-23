@@ -1,5 +1,5 @@
 #!/bin/bash
-rm *.tpkg
+rm *.tpkg /var/tpm-mirror/packages/*
 for i in *; do
 	echo $i
 	test "$i" == "test.sh" && continue
@@ -7,4 +7,4 @@ for i in *; do
 	tar czf ../$i.tpkg *
 	cd ..
 done
-cp *.tpkg /var/tpm-mirror/packages
+mv *.tpkg /var/tpm-mirror/packages

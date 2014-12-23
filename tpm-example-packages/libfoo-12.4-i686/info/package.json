@@ -1,1 +1,1 @@
-[{"info": [{"Description": "Foo Package", "Maintainer": "Niles Rogoff", "Version": "12.5", "Type": "Binary", "Dependancies": ["libexample"], "ReleaseEpoch": 1416539366, "PackageName":"foo", "Architecture": "x86_64"}]}, {}, []]
+[{"info": [{"Description": "Foo Package", "Maintainer": "Niles Rogoff", "Version": "12.5", "Type": "Binary", "Dependancies": [["libexample"]], "ReleaseEpoch": 1416539366, "PackageName":"foo", "Architecture": "x86_64"}]}, {}, []]
